@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Universities Atlas</title>
+<meta name="description" content="UK university and higher-education partnership database: institutions, recruitment and partnership contacts, and a UK map.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230b1220' stroke='%2360a5fa' stroke-width='2'/%3E%3Crect x='10' y='12' width='12' height='9' fill='%23fbbf24'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="vendor/leaflet/MarkerCluster.css">
+<link rel="stylesheet" href="vendor/leaflet/MarkerCluster.Default.css">
+<link rel="stylesheet" href="style.css?v=1795296866">
+</head>
+<body class="locked">
+<header class="top">
+  <a class="brand" href="#/map"><span class="logo"></span><b>Universities</b><span class="dim">Atlas</span></a>
+  <div id="crumbs" class="crumbs"></div>
+  <div class="top-actions">
+    <a class="btn ghost" id="navMap" href="#/map">UK map</a>
+    <a class="btn ghost" id="navInst" href="#/institutions">Institutions</a>
+    <a class="btn ghost" id="navCon" href="#/contacts">Contacts</a>
+    <a class="btn ghost" id="navOv" href="#/overview">Overview</a>
+    <a class="btn ghost" id="navPg" href="#/progress">Progress</a>
+    <span id="syncpill" class="pill" title="Status, notes and stars are saved in this browser only">Local only</span>
+    <button id="lockBtn" class="btn ghost" title="Lock and forget the key on this device">Lock</button>
+    <button id="themeBtn" class="btn ghost" title="Switch light or dark theme" aria-label="Switch theme">◐</button>
+  </div>
+</header>
+
+<div id="lock" class="lock" hidden>
+  <form id="lockForm" class="lock-card" autocomplete="off">
+    <span class="logo"></span>
+    <h1>Universities Atlas</h1>
+    <p class="dim">Enter the access key to open the data.</p>
+    <input id="lockKey" type="password" placeholder="Access key" autocomplete="off" required>
+    <label class="chk"><input id="lockRemember" type="checkbox" checked> Remember on this device</label>
+    <button id="lockGo" class="btn primary" type="submit">Unlock</button>
+    <p id="lockMsg" class="lock-msg" role="alert"></p>
+  </form>
+</div>
+
+<main id="app">
+  <!-- Overview -->
+  <section id="overviewView" class="landing view" hidden>
+    <div class="landing-inner">
+      <p class="eyebrow">UK university partnerships</p>
+      <h1>Who can approve a partnership?</h1>
+      <p class="lede" id="ovStats">Loading…</p>
+      <div class="choices">
+        <a class="choice" href="#/map"><h2>UK map</h2><p>Every mapped institution, nearest first from any postcode or town. Filter by priority and contact coverage.</p><span class="go">Open the map →</span></a>
+        <a class="choice" href="#/institutions"><h2>Institutions</h2><p>Search and filter the institution register, open a record to see its contacts, role coverage and sources.</p><span class="go">Browse institutions →</span></a>
+        <a class="choice" href="#/contacts"><h2>Contacts</h2><p>Named people and team routes by role family, with published email, phone and the source page.</p><span class="go">Browse contacts →</span></a>
+      </div>
+      <div class="centre" id="ovCards"></div>
+    </div>
+  </section>
+
+  <!-- Progress -->
+  <section id="progressView" class="progressview view" hidden>
+    <div class="pg-inner">
+      <div class="pg-head"><div><h1>Data progress</h1><p class="dim" id="pgMeta"></p></div></div>
+      <div class="kpis" id="pgKpis"></div>
+      <div class="cc" style="margin-top:14px"><h3>Role-family coverage across all institutions</h3><div class="pg-table" id="pgFam"></div></div>
+      <div class="centre" style="margin-top:14px" id="pgCards"></div>
+      <div class="cc" style="margin-top:14px"><h3>Institution discovery register</h3><div class="pg-table" id="pgProv"></div></div>
+    </div>
+  </section>
+
+  <!-- UK map (built by map.js) -->
+
+  <!-- Records grid -->
+  <section id="dataView" class="dataview view" hidden>
+    <div class="dv-head">
+      <div class="dv-title"><h1 id="dvTitle"></h1><span id="dvSub" class="dim"></span></div>
+      <div class="dv-chips" id="dvChips"></div>
+    </div>
+    <div class="toolbar">
+      <input id="q" class="search" type="search" placeholder="Search…" autocomplete="off">
+      <div class="tb-filters" id="tbFilters"></div>
+      <div class="tb-right">
+        <button class="btn" id="colsBtn">Columns</button>
+        <button class="btn primary" id="exportBtn">Export CSV</button>
+      </div>
+    </div>
+    <div class="selbar" id="selbar" hidden>
+      <b id="selCount"></b>
+      <span class="sel-actions" id="selActions"></span>
+      <button class="btn link" id="selClear">Clear</button>
+    </div>
+    <div class="grid" id="grid">
+      <div class="grid-head" id="gridHead"></div>
+      <div class="grid-body" id="gridBody"><div class="grid-spacer" id="gridSpacer"></div><div class="grid-rows" id="gridRows"></div></div>
+      <div class="grid-empty" id="gridEmpty" hidden>No records match these filters.</div>
+      <div class="grid-loading" id="gridLoading">Loading records…</div>
+    </div>
+    <div class="statusline" id="statusline"></div>
+  </section>
+</main>
+
+<div id="drawer" class="drawer" hidden></div>
+<div id="modal" class="modal" hidden></div>
+<div id="toast" class="toast" hidden></div>
+
+<script src="vendor/leaflet/leaflet.js"></script>
+<script src="vendor/leaflet/leaflet.markercluster.js"></script>
+<script src="app.js?v=1795296866"></script>
+<script src="map.js?v=1795296866"></script>
+</body>
+</html>
